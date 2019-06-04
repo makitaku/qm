@@ -46,6 +46,11 @@ namespace qm.Controllers
         // GET: Books/Create
         public IActionResult Create()
         {
+            // 出版者を選択リスト化
+            // select distinct Publisher from Book
+            var list = _context.Book.Select(m => new { Publisher = m.Publisher }).Distinct();
+            ViewBag.opts = new SelectList(list, "Publisher", "Publisher");
+
             return View();
         }
 
@@ -54,12 +59,15 @@ namespace qm.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // ポストデータに引数をバインド
         public async Task<IActionResult> Create([Bind("Id,Title,Price,Publisher,Sample")] Book book)
         {
             if (ModelState.IsValid)
             {
+                // モデルをデータベースに反映
                 _context.Add(book);
                 await _context.SaveChangesAsync();
+                // 処理後は一覧画面にリダイレクト
                 return RedirectToAction(nameof(Index));
             }
             return View(book);
@@ -88,6 +96,7 @@ namespace qm.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Price,Publisher,Sample")] Book book)
         {
+            // 隠しフィールドのId値と、URLパラメータのidが等しいかをチェック
             if (id != book.Id)
             {
                 return NotFound();
@@ -100,6 +109,7 @@ namespace qm.Controllers
                     _context.Update(book);
                     await _context.SaveChangesAsync();
                 }
+                // 競合が発生した場合の処理
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!BookExists(book.Id))
@@ -135,9 +145,9 @@ namespace qm.Controllers
         }
 
         // POST: Books/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var book = await _context.Book.FindAsync(id);
             _context.Book.Remove(book);

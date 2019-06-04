@@ -56,6 +56,7 @@ namespace qm
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
+            // デフォルトURLの設定
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
